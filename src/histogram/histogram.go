@@ -1,0 +1,170 @@
+package histogram
+
+import (
+	"fmt"
+)
+
+type Histogram interface {
+	Add(vector []float64)
+
+	Mean() []float64
+
+	Variance() []float64
+
+	CDF(x []float64) float64
+
+	String() (str string)
+
+	Count() float64
+}
+
+type histogram struct {
+	bins      []bin
+	maxbins   int
+	total     uint64
+	dimension int
+}
+
+func NewHistogram(n int, d int) Histogram {
+	return &histogram{
+		bins:      make([]bin, 0),
+		maxbins:   n,
+		total:     0,
+		dimension: d,
+	}
+}
+
+func (h *histogram) Add(values []float64) {
+	v := NewVector(values)
+	if h.dimension != v.Dimension() {
+		return
+	}
+	h.total++
+	for i := range h.bins {
+		if h.bins[i].vec.Equals(v) {
+			h.bins[i].count++
+			return
+		}
+	}
+	h.bins = append(h.bins, bin{count: 1, vec: v})
+	h.trim()
+}
+
+func (h *histogram) Mean() []float64 {
+	if h.total == 0 {
+		return []float64{}
+	}
+
+	sum := make([]float64, h.dimension)
+
+	for i := range h.bins {
+		for j := range sum {
+			sum[j] += h.bins[i].vec.Value(j) * h.bins[i].count
+		}
+	}
+
+	for k, s := range sum {
+		s = s / float64(h.total)
+		sum[k] = s
+	}
+	return sum
+}
+
+func (h *histogram) Variance() []float64 {
+	if h.total == 0 {
+		return []float64{}
+	}
+
+	sum := make([]float64, h.dimension)
+	mean := h.Mean()
+
+	for i := range h.bins {
+		for j := range sum {
+			sum[j] += (h.bins[i].count * (h.bins[i].vec.Value(j) - mean[j]) * (h.bins[i].vec.Value(j) - mean[j]))
+		}
+	}
+
+	for k, s := range sum {
+		s = s / float64(h.total)
+		sum[k] = s
+	}
+	return sum
+}
+
+func (h *histogram) CDF(x []float64) float64 {
+	xVec := NewVector(x)
+	if xVec.Dimension() != h.dimension {
+		return -1
+	}
+	count := 0.0
+	for i := range h.bins {
+		if h.bins[i].vec.LessThanOrEqualTo(xVec) {
+			count += float64(h.bins[i].count)
+		}
+	}
+
+	return count / float64(h.total)
+}
+
+func (h *histogram) String() (str string) {
+	str += fmt.Sprintln("Total:", h.total)
+
+	for i := range h.bins {
+		var bar string
+		// for j := 0; j < int(float64(h.bins[i].count)/float64(h.total)*200); j++ {
+		for j := 0; j < int(h.bins[i].count); j++ {
+			bar += "."
+		}
+		str += fmt.Sprintln(h.bins[i].vec.String(), "\t", bar)
+	}
+
+	return
+}
+
+func (h *histogram) Count() float64 {
+	return float64(h.total)
+}
+
+// ==============================================================================
+// trim merges adjacent bins to decrease the bin count to the maximum value
+func (h *histogram) trim() {
+	for len(h.bins) > h.maxbins {
+		// Find closest bins in terms of value
+		minDelta := 1e99
+		min_i := 0
+		min_j := 0
+		for i := range h.bins {
+			for j := range h.bins { // TODO: iterate from i + 1 to end
+				if i == j {
+					continue
+				}
+
+				if delta := h.bins[i].vec.Distance(h.bins[j].vec); delta < minDelta {
+					minDelta = delta
+					min_i = i
+					min_j = j
+				}
+
+			}
+		}
+
+		// We need to merge bins minDeltaIndex-1 and minDeltaIndex
+		totalCount := h.bins[min_i].count + h.bins[min_j].count
+		mergedbin := bin{
+			vec:   h.bins[min_i].vec.Mean(h.bins[min_j].vec),
+			count: totalCount, // summed heights
+		}
+
+		// Remove min_i and min_j bins
+		min, max := sort(min_i, min_j)
+
+		head := h.bins[0:min]
+		mid := h.bins[min+1 : max]
+		tail := h.bins[max+1:]
+
+		h.bins = append(head, mid...)
+		h.bins = append(h.bins, tail...)
+
+		h.bins = append(h.bins, mergedbin)
+	}
+}
