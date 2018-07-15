@@ -7,61 +7,68 @@ import (
 )
 
 func TestHistogram(t *testing.T) {
-	b := 4
-	d := 3
+	for _, b := range []int{2, 3, 4, 5, 10} {
 
-	h := NewHistogram(b, d)
-	var sample = [][]float64{}
+		for _, d := range []int{2, 3, 4, 5, 10} {
 
-	for j := 0; j < 10; j++ {
-		var values = []float64{}
-		for i := 0; i < d; i++ {
-			values = append(values, float64(rand.Intn(100)))
-		}
-		sample = append(sample, values)
-		h.Add(values)
-	}
-	// fmt.Println(sample)
-	count := h.Count()
-	if !approx(count, float64(len(sample))) {
-		t.Errorf("Count mismatch %v != %v", count, len(sample))
-	}
+			h := NewHistogram(b, d)
+			var sample = [][]float64{}
 
-	var sum = make([]float64, d)
-	for _, values := range sample {
-		for i := 0; i < d; i++ {
-			sum[i] = sum[i] + values[i]
-		}
-	}
+			for _, n := range []int{1, 5, 10, 50, 100} {
 
-	for k, _ := range sum {
-		sum[k] = sum[k] / float64(len(sample))
-	}
-	// fmt.Println(sum)
+				for j := 0; j < n; j++ {
+					var values = []float64{}
+					for i := 0; i < d; i++ {
+						values = append(values, float64(rand.Intn(100)))
+					}
+					sample = append(sample, values)
+					h.Add(values)
+				}
+				// fmt.Println(sample)
 
-	mean := h.Mean()
-	for k, _ := range sum {
-		if !approx(mean[k], sum[k]) {
-			t.Errorf("Mean mismatch %v != %v", mean, sum)
-		}
-	}
+				count := h.Count()
+				if !approx(count, float64(len(sample))) {
+					t.Errorf("Count mismatch %v != %v", count, len(sample))
+				}
 
-	var sumsquare = make([]float64, d)
-	for _, values := range sample {
-		for i := 0; i < d; i++ {
-			sumsquare[i] = sumsquare[i] + (values[i]-sum[i])*(values[i]-sum[i])
-		}
-	}
+				var sum = make([]float64, d)
+				for _, values := range sample {
+					for i := 0; i < d; i++ {
+						sum[i] = sum[i] + values[i]
+					}
+				}
 
-	for k, _ := range sumsquare {
-		sumsquare[k] = sumsquare[k] / float64(len(sample))
-	}
-	// fmt.Println(sumsquare)
+				for k, _ := range sum {
+					sum[k] = sum[k] / float64(len(sample))
+				}
+				// fmt.Println(sum)
 
-	variance := h.Variance()
-	for k, _ := range sumsquare {
-		if !approx(variance[k], sumsquare[k]) {
-			t.Errorf("Variance mismatch %v != %v", variance, sumsquare)
+				mean := h.Mean()
+				for k, _ := range sum {
+					if !approx(mean[k], sum[k]) {
+						t.Errorf("Mean mismatch %v != %v", mean, sum)
+					}
+				}
+
+				var sumsquare = make([]float64, d)
+				for _, values := range sample {
+					for i := 0; i < d; i++ {
+						sumsquare[i] = sumsquare[i] + (values[i]-sum[i])*(values[i]-sum[i])
+					}
+				}
+
+				for k, _ := range sumsquare {
+					sumsquare[k] = sumsquare[k] / float64(len(sample))
+				}
+				// fmt.Println(sumsquare)
+
+				variance := h.Variance()
+				for k, _ := range sumsquare {
+					if !approx(variance[k], sumsquare[k]) {
+						t.Errorf("Variance mismatch %v != %v", variance, sumsquare)
+					}
+				}
+			}
 		}
 	}
 }
