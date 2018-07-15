@@ -72,3 +72,29 @@ func TestHistogram(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkHistogramBinsD1N50(t *testing.B)  { benchmarkHistogramBins(1, 50, t) }
+func BenchmarkHistogramBinsD2N50(t *testing.B)  { benchmarkHistogramBins(2, 50, t) }
+func BenchmarkHistogramBinsD5N50(t *testing.B)  { benchmarkHistogramBins(5, 50, t) }
+func BenchmarkHistogramBinsD10N50(t *testing.B) { benchmarkHistogramBins(10, 50, t) }
+
+func BenchmarkHistogramBinsD1N100(t *testing.B)  { benchmarkHistogramBins(1, 100, t) }
+func BenchmarkHistogramBinsD2N100(t *testing.B)  { benchmarkHistogramBins(2, 100, t) }
+func BenchmarkHistogramBinsD5N100(t *testing.B)  { benchmarkHistogramBins(5, 100, t) }
+func BenchmarkHistogramBinsD10N100(t *testing.B) { benchmarkHistogramBins(10, 100, t) }
+
+func benchmarkHistogramBins(d int, n int, t *testing.B) {
+	for b := 1; b < t.N; b++ {
+		h := NewHistogram(b, d)
+		var sample = [][]float64{}
+
+		for j := 0; j < 100; j++ {
+			var values = []float64{}
+			for i := 0; i < d; i++ {
+				values = append(values, float64(rand.Intn(100)))
+			}
+			sample = append(sample, values)
+			h.Add(values)
+		}
+	}
+}
