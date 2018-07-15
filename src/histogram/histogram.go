@@ -35,8 +35,10 @@ func NewHistogram(n int, d int) Histogram {
 }
 
 func (h *histogram) Add(values []float64) {
-	v := NewVector(values)
-	if h.dimension != v.Dimension() {
+	m := NewVector(values)
+	v := NewVector(make([]float64, len(values)))
+
+	if h.dimension != m.Dimension() {
 		return
 	}
 	h.total++
@@ -46,7 +48,7 @@ func (h *histogram) Add(values []float64) {
 			return
 		}
 	}
-	h.bins = append(h.bins, bin{count: 1, vec: v})
+	h.bins = append(h.bins, bin{count: 1, vec: m, variance: v})
 	h.trim()
 }
 
@@ -70,6 +72,7 @@ func (h *histogram) Mean() []float64 {
 	return sum
 }
 
+// http://www.science.canterbury.ac.nz/nzns/issues/vol7-1979/duncan_b.pdf
 func (h *histogram) Variance() []float64 {
 	if h.total == 0 {
 		return []float64{}
@@ -80,13 +83,13 @@ func (h *histogram) Variance() []float64 {
 
 	for i := range h.bins {
 		for j := range sum {
-			sum[j] += (h.bins[i].count * (h.bins[i].vec.Value(j) - mean[j]) * (h.bins[i].vec.Value(j) - mean[j]))
+			sum[j] += (h.bins[i].count * (h.bins[i].variance.Value(j) + h.bins[i].vec.Value(j)*h.bins[i].vec.Value(j)))
 		}
 	}
 
-	for k, s := range sum {
-		s = s / float64(h.total)
-		sum[k] = s
+	for k, _ := range sum {
+		sum[k] = sum[k] / float64(h.total)
+		sum[k] = sum[k] - mean[k]*mean[k]
 	}
 	return sum
 }
@@ -148,12 +151,8 @@ func (h *histogram) trim() {
 			}
 		}
 
-		// We need to merge bins minDeltaIndex-1 and minDeltaIndex
-		totalCount := h.bins[min_i].count + h.bins[min_j].count
-		mergedbin := bin{
-			vec:   h.bins[min_i].vec.Mean(h.bins[min_j].vec),
-			count: totalCount, // summed heights
-		}
+		// We need to merge bins min_i-1 and min_j
+		mergedbin := h.bins[min_i].Merge(h.bins[min_j])
 
 		// Remove min_i and min_j bins
 		min, max := sort(min_i, min_j)

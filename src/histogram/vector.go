@@ -6,8 +6,33 @@ import (
 )
 
 type bin struct {
-	vec   vector
-	count float64
+	vec      vector
+	variance vector
+	count    float64
+}
+
+// http://www.science.canterbury.ac.nz/nzns/issues/vol7-1979/duncan_b.pdf
+func (b *bin) Merge(o bin) bin {
+	dimension := b.vec.Dimension()
+
+	count := b.count + o.count
+
+	mean := make([]float64, dimension)
+	variance := make([]float64, dimension)
+
+	for i := 0; i < dimension; i++ {
+		mean[i] = (b.count*b.vec.Value(i) + o.count*o.vec.Value(i)) / float64(count)
+
+		variance[i] =
+			((b.count*(b.variance.Value(i)+b.vec.Value(i)*b.vec.Value(i)) +
+				o.count*(o.variance.Value(i)+o.vec.Value(i)*o.vec.Value(i))) / float64(count)) - mean[i]*mean[i]
+	}
+
+	return bin{
+		vec:      NewVector(mean),
+		variance: NewVector(variance),
+		count:    count,
+	}
 }
 
 type vector struct {
@@ -53,7 +78,7 @@ func (v *vector) LessThanOrEqualTo(o vector) bool {
 	return true
 }
 
-func (v *vector) Mean(o vector) vector {
+func (v *vector) Mean1(o vector) vector {
 	m := make([]float64, v.Dimension())
 
 	for i := range v.values {
