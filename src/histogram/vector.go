@@ -78,16 +78,6 @@ func (v *vector) LessThanOrEqualTo(o vector) bool {
 	return true
 }
 
-func (v *vector) Mean1(o vector) vector {
-	m := make([]float64, v.Dimension())
-
-	for i := range v.values {
-		m[i] = (v.Value(i) + o.Value(i)) / 2
-	}
-
-	return vector{values: m}
-}
-
 func (v *vector) String() string {
 	return fmt.Sprintf("%v", v.values)
 }
