@@ -5,7 +5,7 @@ import (
 )
 
 func approx(x, y float64) bool {
-	return math.Abs(x-y) < 0.2
+	return math.Abs(x-y) < 0.001
 }
 
 func square(x float64) float64 {
