@@ -13,6 +13,8 @@ type Histogram interface {
 
 	CDF(x []float64) float64
 
+	Quantile(q float64) []float64
+
 	String() (str string)
 
 	Count() float64
@@ -92,6 +94,19 @@ func (h *histogram) Variance() []float64 {
 		sum[k] = sum[k] - mean[k]*mean[k]
 	}
 	return sum
+}
+
+func (h *histogram) Quantile(q float64) []float64 {
+	count := q * float64(h.total)
+	for i := range h.bins {
+		count -= float64(h.bins[i].count)
+
+		if count <= 0 {
+			return h.bins[i].vec.Values()
+		}
+	}
+
+	return []float64{}
 }
 
 func (h *histogram) CDF(x []float64) float64 {
