@@ -93,19 +93,3 @@ func (v *vector) Equals(o vector) bool {
 	}
 	return true
 }
-
-func (v *vector) Split(o vector, n int) []vector {
-	result := make([]vector, n)
-
-	splits := make([][]float64, n)
-	for i := range v.values {
-		for j, k := range linspace(v.Value(i), o.Value(i), n) {
-			splits[j] = append(splits[j], k)
-		}
-	}
-
-	for i, split := range splits {
-		result[i] = NewVector(split)
-	}
-	return result
-}
