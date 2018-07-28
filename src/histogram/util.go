@@ -18,3 +18,17 @@ func sort(x, y int) (int, int) {
 	}
 	return y, x
 }
+
+func linspace(start, stop float64, num int) []float64 {
+	step := 0.
+	if num == 1 {
+		return []float64{start}
+	}
+	step = (stop - start) / float64(num-1)
+
+	r := make([]float64, num, num)
+	for i := 0; i < num; i++ {
+		r[i] = start + float64(i)*step
+	}
+	return r
+}
