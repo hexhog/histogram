@@ -50,7 +50,7 @@ func (h *histogram) Add(values []float64) {
 			return
 		}
 	}
-	h.bins = append(h.bins, bin{count: 1, vec: m, variance: v})
+	h.bins = append(h.bins, bin{count: 1, vec: m, variance: v, min: m, max: m})
 	h.trim()
 }
 
@@ -114,14 +114,29 @@ func (h *histogram) CDF(x []float64) float64 {
 	if xVec.Dimension() != h.dimension {
 		return -1
 	}
-	count := 0.0
+	sum := 0.0
 	for i := range h.bins {
-		if h.bins[i].vec.LessThanOrEqualTo(xVec) {
-			count += float64(h.bins[i].count)
+		count := h.bins[i].count
+		for j := 0; j < h.dimension; j++ {
+			var (
+				factor float64
+				x      = xVec.Value(j)
+				min    = h.bins[i].min.Value(j)
+				max    = h.bins[i].max.Value(j)
+			)
+			if x < min {
+				factor = 1
+			} else if x >= max {
+				factor = 0
+			} else {
+				factor = (x - min) / float64(max-min)
+			}
+			count *= factor
 		}
+		sum += count
 	}
 
-	return count / float64(h.total)
+	return sum / float64(h.total)
 }
 
 func (h *histogram) String() (str string) {
@@ -133,7 +148,7 @@ func (h *histogram) String() (str string) {
 		for j := 0; j < int(h.bins[i].count); j++ {
 			bar += "."
 		}
-		str += fmt.Sprintln(h.bins[i].vec.String(), "\t", bar)
+		str += fmt.Sprintln(h.bins[i].vec.String(), h.bins[i].min.String(), h.bins[i].max.String(), "\t", h.bins[i].count)
 	}
 
 	return

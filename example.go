@@ -23,8 +23,8 @@ func main() {
 
 	fmt.Println("MEAN", h.Mean())
 	fmt.Println("VARIANCE", h.Variance())
-	fmt.Println("QUANTILE", h.Quantile(0.5))
-	fmt.Println("CDF", h.CDF([]float64{100, 100, 100}))
+	// fmt.Println("QUANTILE", h.Quantile(0.5))
+	fmt.Println("CDF", h.CDF([]float64{10, 25, 38}))
 	fmt.Println("STRING", h.String())
 	fmt.Println("COUNT", h.Count())
 }

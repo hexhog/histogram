@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func compute(b int, data [][]float64) ([]float64, []float64, float64) {
+func compute(b int, data [][]float64) ([]float64, []float64, float64, float64) {
 	d := len(data[0])
 	h := NewHistogram(b, d)
 
@@ -13,7 +13,9 @@ func compute(b int, data [][]float64) ([]float64, []float64, float64) {
 		h.Add(val)
 	}
 
-	return h.Mean(), h.Variance(), h.Count()
+	mean := h.Mean()
+
+	return mean, h.Variance(), h.Count(), h.CDF(mean)
 }
 
 func TestSampleData(t *testing.T) {
@@ -25,12 +27,12 @@ func TestSampleData(t *testing.T) {
 
 	for d, data := range [][][]float64{dataDimension1, dataDimension2, dataDimension3, dataDimension4, dataDimension5} {
 		fmt.Println("DIMENSION", d+1)
-		_mean, _variance, _count = compute(1, data)
+		_mean, _variance, _count, _ = compute(1, data)
 
-		for _, b := range []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 100} {
+		for _, b := range []int{100} {
 			fmt.Println("BINS", b)
 
-			mean, variance, count := compute(b, data)
+			mean, variance, count, cdf := compute(b, data)
 			fmt.Println("COUNT", count)
 			if !approx(count, _count) {
 				t.Errorf("Count across different bins of size %d incorrect %v %v", b, count, _count)
@@ -49,6 +51,7 @@ func TestSampleData(t *testing.T) {
 				}
 			}
 
+			fmt.Println("CDF", cdf)
 		}
 	}
 }

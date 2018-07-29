@@ -9,6 +9,8 @@ type bin struct {
 	vec      vector
 	variance vector
 	count    float64
+	min      vector
+	max      vector
 }
 
 // http://www.science.canterbury.ac.nz/nzns/issues/vol7-1979/duncan_b.pdf
@@ -19,6 +21,8 @@ func (b *bin) Merge(o bin) bin {
 
 	mean := make([]float64, dimension)
 	variance := make([]float64, dimension)
+	min := make([]float64, dimension)
+	max := make([]float64, dimension)
 
 	for i := 0; i < dimension; i++ {
 		mean[i] = (b.count*b.vec.Value(i) + o.count*o.vec.Value(i)) / float64(count)
@@ -26,12 +30,27 @@ func (b *bin) Merge(o bin) bin {
 		variance[i] =
 			((b.count*(b.variance.Value(i)+b.vec.Value(i)*b.vec.Value(i)) +
 				o.count*(o.variance.Value(i)+o.vec.Value(i)*o.vec.Value(i))) / float64(count)) - mean[i]*mean[i]
+
+		if b.min.Value(i) <= o.min.Value(i) {
+			min[i] = b.min.Value(i)
+		} else {
+			min[i] = o.min.Value(i)
+		}
+
+		if b.max.Value(i) >= o.max.Value(i) {
+			max[i] = b.max.Value(i)
+		} else {
+			max[i] = o.max.Value(i)
+		}
+
 	}
 
 	return bin{
 		vec:      NewVector(mean),
 		variance: NewVector(variance),
 		count:    count,
+		min:      NewVector(min),
+		max:      NewVector(max),
 	}
 }
 
