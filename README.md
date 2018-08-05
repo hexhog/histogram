@@ -63,6 +63,22 @@ CDF(MEAN + 2SD) 0.8878920403025984 0.8915
 ok 2229.558s
 ```
 
+## Comparing CDF with Python
+```python
+from scipy.stats import mvn
+import numpy as np
+
+mu = np.array([0.0, 0.0])
+S = np.array([[1.0,0.0],[0.0,1.0]])
+low = np.array([-1000.0, -1000.0])
+
+mvn.mvnun(low,np.array([-2.0, -2.0]),mu,S)[0] # CDF(MEAN - 2SD)
+mvn.mvnun(low,np.array([-1.0, -1.0]),mu,S)[0] # CDF(MEAN - SD)
+mvn.mvnun(low,np.array([0.0, 0.0]),mu,S)[0]   # CDF(MEAN)
+mvn.mvnun(low,np.array([1.0, 1.0]),mu,S)[0]   # CDF(MEAN + SD)
+mvn.mvnun(low,np.array([2.0, 2.0]),mu,S)[0]   # CDF(MEAN + 2SD)
+```
+
 # License
 MIT License
 
