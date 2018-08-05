@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func compute(b int, data [][]float64) ([]float64, []float64, float64, float64) {
+func compute(b int, data [][]float64) ([]float64, []float64, float64, float64, float64, float64, float64, float64) {
 	d := len(data[0])
 	h := NewHistogram(b, d)
 
@@ -17,29 +17,20 @@ func compute(b int, data [][]float64) ([]float64, []float64, float64, float64) {
 	variance := h.Variance()
 	sd := sqrt(variance)
 
-	fmt.Println("A", b, d, h.CDF(mean), h.CDF(subtract(mean, sd)), h.CDF(add(mean, sd)))
-
-	return mean, variance, h.Count(), h.CDF(mean)
+	return mean, variance, h.Count(), h.CDF(mean), h.CDF(subtract(mean, multiply(2, sd))), h.CDF(subtract(mean, sd)), h.CDF(add(mean, sd)), h.CDF(add(mean, multiply(2, sd)))
 }
 
 func TestSampleData(t *testing.T) {
-	var (
-		_mean     []float64
-		_variance []float64
-		_count    float64
-	)
-
 	for d, data := range [][][]float64{dataDimension1} {
-		// for d, data := range [][][]float64{dataDimension1, dataDimension2, dataDimension3, dataDimension4, dataDimension5} {
 		fmt.Println("DIMENSION", d+1)
-		_mean, _variance, _count, _ = compute(1, data)
-		fmt.Println("MEAN", _mean)
-		fmt.Println("VARIANCE", _variance)
+		_mean, _variance, _count, _, _, _, _, _ := compute(1, data)
 
-		for _, b := range []int{2, 3, 4, 5} {
+		for _, b := range []int{32, 64, 128} {
 			fmt.Println("BINS", b)
 
-			mean, variance, count, cdf := compute(b, data)
+			mean, variance, count, cdf0, cdf1, cdf2, cdf3, cdf4 := compute(b, data)
+			sd := sqrt(variance)
+
 			fmt.Println("COUNT", count)
 			if !approx(count, _count) {
 				t.Errorf("Count across different bins of size %d incorrect %v %v", b, count, _count)
@@ -58,13 +49,52 @@ func TestSampleData(t *testing.T) {
 				}
 			}
 
-			fmt.Println("CDF", cdf)
 			// Lower the bin count, lower the accuracy.
-			// Accuracy of 0.05 for a min bin value of at least 128.
+			// Accuracy of 0.01 for a min bin value of at least 32.
 			// For higher accuracy may need to increase bin count at the cost of increased time for merging bins
-			// if !approx2(cdf, (1 / pow(d+1))) {
-			// 	t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf)
-			// }
+			fmt.Println("CDF MEAN", cdf0)
+			if !approx2(cdf0, calculate(data, mean, count)) {
+				t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf0)
+			}
+
+			fmt.Println("CDF MEAN - 2SD", cdf1)
+			if !approx2(cdf1, calculate(data, subtract(mean, multiply(2, sd)), count)) {
+				t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf1)
+			}
+
+			fmt.Println("CDF MEAN - SD", cdf2)
+			if !approx2(cdf2, calculate(data, subtract(mean, sd), count)) {
+				t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf2)
+			}
+
+			fmt.Println("CDF MEAN + SD", cdf3)
+			if !approx2(cdf3, calculate(data, add(mean, sd), count)) {
+				t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf3)
+			}
+
+			fmt.Println("CDF MEAN + 2SD", cdf4)
+			if !approx2(cdf4, calculate(data, add(mean, multiply(2, sd)), count)) {
+				t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf4)
+			}
 		}
 	}
+}
+
+func less(x, y []float64) bool {
+	for i := range x {
+		if x[i] > y[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func calculate(data [][]float64, compare []float64, count float64) float64 {
+	sum := 0.0
+	for i := range data {
+		if less(data[i], compare) {
+			sum += 1
+		}
+	}
+	return sum / count
 }

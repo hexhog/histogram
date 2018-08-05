@@ -9,18 +9,15 @@ func approx(x, y float64) bool {
 }
 
 func approx2(x, y float64) bool {
-	return math.Abs(x-y) < 0.05
-}
-
-func pow(x int) float64 {
-	return math.Pow(2, float64(x))
+	return math.Abs(x-y) < 0.01
 }
 
 func sqrt(x []float64) []float64 {
+	r := make([]float64, len(x))
 	for i := range x {
-		x[i] = math.Sqrt(x[i])
+		r[i] = math.Sqrt(x[i])
 	}
-	return x
+	return r
 }
 
 func add(x, y []float64) []float64 {
@@ -41,6 +38,14 @@ func subtract(x, y []float64) []float64 {
 	r := make([]float64, len(x))
 	for i := range x {
 		r[i] = x[i] - y[i]
+	}
+	return r
+}
+
+func multiply(y int, x []float64) []float64 {
+	r := make([]float64, len(x))
+	for i := range x {
+		r[i] = float64(y) * x[i]
 	}
 	return r
 }

@@ -110,6 +110,7 @@ func (h *histogram) Quantile(q float64) []float64 {
 }
 
 func (h *histogram) CDF(x []float64) float64 {
+	// fmt.Println(x)
 	xVec := NewVector(x)
 	if xVec.Dimension() != h.dimension {
 		return -1
@@ -124,14 +125,17 @@ func (h *histogram) CDF(x []float64) float64 {
 				min    = h.bins[i].min.Value(j)
 				max    = h.bins[i].max.Value(j)
 			)
+			// fmt.Println(x, min, max)
 			if x < min {
-				factor = 1
-			} else if x >= max {
 				factor = 0
+			} else if x >= max {
+				factor = 1
 			} else {
 				factor = (x - min) / float64(max-min)
 			}
+			// fmt.Println("Factor", factor)
 			count *= factor
+			// fmt.Println("Count", count)
 		}
 		sum += count
 	}
