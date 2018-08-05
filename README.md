@@ -4,22 +4,17 @@ Streaming approximate multidimensional histograms in Go
 # Test Results
 ```
 go test -run TestSampleData -timeout 10h
-```
 
-```
 DIMENSION 1
 BINS 1024
 COUNT 10000
 MEAN [-0.3694206912266691]
 VARIANCE [9753.369296159837]
-```
-|                | Algo                | Calculated |
-|----------------|---------------------|------------|
-| CDF MEAN - 2SD | 0.16155923019547438 | 0.1614     |
-| CDF MEAN - SD  | 0.0216              | 0.0216     |
-| CDF MEAN       | 0.5071178239171282  | 0.5066     |
-| CDF MEAN + SD  | 0.8365931225939377  | 0.8367     |
-| CDF MEAN + 2SD | 0.9768476589596259  | 0.9769     |
+CDF MEAN 0.5071178239171282 0.5066
+CDF MEAN - 2SD 0.0216 0.0216
+CDF MEAN - SD 0.16155923019547438 0.1614
+CDF MEAN + SD 0.8365931225939377 0.8367
+CDF MEAN + 2SD 0.9768476589596259 0.9769
 
 DIMENSION 2
 BINS 1024
@@ -67,8 +62,6 @@ CDF MEAN + 2SD 0.8878920403025984 0.8915
 
 
 ok 2229.558s
-
-
 ```
 
 # License
