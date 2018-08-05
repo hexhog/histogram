@@ -1,7 +1,6 @@
 package histogram
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -32,7 +31,6 @@ func add(x, y []float64) []float64 {
 	for i := range x {
 		r[i] = x[i] + y[i]
 	}
-	fmt.Println(r)
 	return r
 }
 
@@ -44,7 +42,6 @@ func subtract(x, y []float64) []float64 {
 	for i := range x {
 		r[i] = x[i] - y[i]
 	}
-	fmt.Println(r)
 	return r
 }
 
