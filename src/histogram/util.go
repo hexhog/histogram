@@ -8,6 +8,14 @@ func approx(x, y float64) bool {
 	return math.Abs(x-y) < 0.0001
 }
 
+func approx2(x, y float64) bool {
+	return math.Abs(x-y) < 0.05
+}
+
+func pow(x int) float64 {
+	return math.Pow(2, float64(x))
+}
+
 func square(x float64) float64 {
 	return x * x
 }

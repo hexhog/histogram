@@ -149,7 +149,7 @@ func (h *histogram) String() (str string) {
 			bar += "."
 		}
 		// str += fmt.Sprintln(h.bins[i].vec.String(), "\t", bar)
-		str += fmt.Sprintln(h.bins[i].vec.String(), h.bins[i].min.String(), h.bins[i].max.String(), "\t", h.bins[i].count)
+		str += fmt.Sprintln(h.bins[i].vec.String(), h.bins[i].min.String(), h.bins[i].max.String(), "\t", h.Count())
 	}
 
 	return

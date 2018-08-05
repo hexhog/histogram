@@ -29,7 +29,7 @@ func TestSampleData(t *testing.T) {
 		fmt.Println("DIMENSION", d+1)
 		_mean, _variance, _count, _ = compute(1, data)
 
-		for _, b := range []int{100} {
+		for _, b := range []int{128, 256, 512} {
 			fmt.Println("BINS", b)
 
 			mean, variance, count, cdf := compute(b, data)
@@ -52,6 +52,12 @@ func TestSampleData(t *testing.T) {
 			}
 
 			fmt.Println("CDF", cdf)
+			// Lower the bin count, lower the accuracy.
+			// Accuracy of 0.05 for a min bin value of at least 128.
+			// For higher accuracy may need to increase bin count at the cost of increased time for merging bins
+			if !approx2(cdf, (1 / pow(d+1))) {
+				t.Errorf("CDF of size %d dimension %d incorrect %v", b, d+1, cdf)
+			}
 		}
 	}
 }
