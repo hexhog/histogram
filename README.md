@@ -1,5 +1,11 @@
-# histogram
-Streaming approximate multidimensional histograms in Go
+# histogram - Streaming Multidimensional Approximate Histograms in Go
+
+* This package provides multidimensional [Streaming Approximate Histograms](https://vividcortex.com/blog/2013/07/08/streaming-approximate-histograms/) for efficient quantile approximations.
+* The histograms in this package are based on the algorithms found in Ben-Haim & Yom-Tov's *A Streaming Parallel Decision Tree Algorithm* ([PDF](http://jmlr.org/papers/volume11/ben-haim10a/ben-haim10a.pdf)).
+* Histogram bins do not have a preset size. As values stream into the histogram, bins are dynamically added and merged.
+* A maximum bin size is passed as an argument to the constructor methods. A
+larger bin size yields more accurate approximations at the cost of increased
+memory utilization and performance.
 
 # Test Results
 ```
